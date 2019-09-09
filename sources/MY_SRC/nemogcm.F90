@@ -118,13 +118,13 @@ CONTAINS
       !!              Madec, 2008, internal report, IPSL.
       !!----------------------------------------------------------------------
       INTEGER ::   istp       ! time step index
-      !{ DRAKKAR
+!{ DRAKKAR 
       !! for timing each step
       CHARACTER(LEN=8)      :: cldate
       CHARACTER(LEN=10)     :: cltime
       CHARACTER(LEN=5)      :: clzone
       INTEGER, DIMENSION(8) :: ivalue
-      !{ DRAKKAR !
+!{ DRAKKAR !
 
       !!----------------------------------------------------------------------
       !
@@ -175,12 +175,12 @@ CONTAINS
 #endif
 
       DO WHILE ( istp <= nitend .AND. nstop == 0 )
-         !{ DRAKKAR : print time step for run monitoring
+!{ DRAKKAR : print time step for run monitoring
          IF (lwp ) THEN
-            CALL DATE_AND_TIME(cldate,cltime,clzone,ivalue)
-            print '("#OPA_time: "i8,1x,8i4)', istp, ivalue(:)   ! DRAKKAR code : print time step for run monitoring
+           CALL DATE_AND_TIME(cldate,cltime,clzone,ivalue)
+           print '(i8,1x,8i4)', istp, ivalue(:)   ! DRAKKAR code : print time step for run monitoring
          ENDIF
-         ! DRAKKAR }
+! DRAKKAR }
 #if defined key_agrif
          CALL stp                         ! AGRIF: time stepping
 #else
@@ -198,18 +198,18 @@ CONTAINS
       !                            !------------------------!
       !                            !==  finalize the run  ==!
       !                            !------------------------!
-      !{ DRAKKAR : to have information  for scripts
+!{ DRAKKAR : to have information  for scripts
       IF(lwp) WRITE(numout,*) 'run stop at : ',ndastp
       IF ( lwp ) THEN
-         IF( nstop /= 0  ) THEN   ! error print
-            WRITE(numout,cform_ccc)   ! Flag ;);););)
-            WRITE(numout,cform_err)
-            WRITE(numout,*) nstop, ' error have been found'
-         ELSE
-            WRITE(numout,cform_aaa)   ! Flag AAAAAAA
-         ENDIF
+          IF( nstop /= 0  ) THEN   ! error print
+             WRITE(numout,cform_ccc)   ! Flag ;);););)
+             WRITE(numout,cform_err)
+             WRITE(numout,*) nstop, ' error have been found' 
+          ELSE
+             WRITE(numout,cform_aaa)   ! Flag AAAAAAA
+          ENDIF
       ENDIF
-      ! DRAKKAR }
+! DRAKKAR }
       !
 #if defined key_agrif
       IF( .NOT. Agrif_Root() ) THEN
@@ -412,35 +412,35 @@ CONTAINS
       IF( nn_timing == 1 )  CALL timing_init
       !
       !                                      ! General initialization
-      CALL     phy_cst    ! Physical constants
-      CALL     eos_init   ! Equation of state
+                            CALL     phy_cst    ! Physical constants
+                            CALL     eos_init   ! Equation of state
       IF( lk_c1d        )   CALL     c1d_init   ! 1D column configuration
-      CALL     dom_cfg    ! Domain configuration
-      CALL     dom_init   ! Domain
+                            CALL     dom_cfg    ! Domain configuration
+                            CALL     dom_init   ! Domain
 
       IF( ln_nnogather )    CALL nemo_northcomms   ! Initialise the northfold neighbour lists (must be done after the masks are defined)
 
       IF( ln_ctl        )   CALL prt_ctl_init   ! Print control
 
-      CALL  istate_init   ! ocean initial state (Dynamics and tracers)
+                            CALL  istate_init   ! ocean initial state (Dynamics and tracers)
 
       IF( lk_tide       )   CALL    tide_init( nit000 )    ! Initialisation of the tidal harmonics
 
-      CALL     sbc_init   ! Forcings : surface module (clem: moved here for bdy purpose)
+                            CALL     sbc_init   ! Forcings : surface module (clem: moved here for bdy purpose)
 
       IF( lk_bdy        )   CALL     bdy_init   ! Open boundaries initialisation
       IF( lk_bdy        )   CALL bdy_dta_init   ! Open boundaries initialisation of external data arrays
       IF( lk_bdy .AND. lk_tide )   &
          &                  CALL bdytide_init   ! Open boundaries initialisation of tidal harmonic forcing
 
-      CALL dyn_nept_init  ! simplified form of Neptune effect
+                            CALL dyn_nept_init  ! simplified form of Neptune effect
       !
       IF( ln_crs        )   CALL     crs_init   ! Domain initialization of coarsened grid
       !
-      ! Ocean physics
+                                ! Ocean physics
       !                                         ! Vertical physics
-      CALL     zdf_init      ! namelist read
-      CALL zdf_bfr_init      ! bottom friction
+                            CALL     zdf_init      ! namelist read
+                            CALL zdf_bfr_init      ! bottom friction
       IF( lk_zdfric     )   CALL zdf_ric_init      ! Richardson number dependent Kz
       IF( lk_zdftke     )   CALL zdf_tke_init      ! TKE closure scheme
       IF( lk_zdfgls     )   CALL zdf_gls_init      ! GLS closure scheme
@@ -449,48 +449,48 @@ CONTAINS
       IF( lk_zdfddm .AND. .NOT. lk_zdfkpp )   &
          &                  CALL zdf_ddm_init      ! double diffusive mixing
       !                                         ! Lateral physics
-      CALL ldf_tra_init      ! Lateral ocean tracer physics
-      CALL ldf_dyn_init      ! Lateral ocean momentum physics
+                            CALL ldf_tra_init      ! Lateral ocean tracer physics
+                            CALL ldf_dyn_init      ! Lateral ocean momentum physics
       IF( lk_ldfslp     )   CALL ldf_slp_init      ! slope of lateral mixing
 
       !                                     ! Active tracers
-      CALL tra_qsr_init   ! penetrative solar radiation qsr
-      CALL tra_bbc_init   ! bottom heat flux
+                            CALL tra_qsr_init   ! penetrative solar radiation qsr
+                            CALL tra_bbc_init   ! bottom heat flux
       IF( lk_trabbl     )   CALL tra_bbl_init   ! advective (and/or diffusive) bottom boundary layer scheme
-      CALL tra_dmp_init   ! internal damping trends- tracers
-      CALL tra_adv_init   ! horizontal & vertical advection
-      CALL tra_ldf_init   ! lateral mixing
-      CALL tra_zdf_init   ! vertical mixing and after tracer fields
+                            CALL tra_dmp_init   ! internal damping trends- tracers
+                            CALL tra_adv_init   ! horizontal & vertical advection
+                            CALL tra_ldf_init   ! lateral mixing
+                            CALL tra_zdf_init   ! vertical mixing and after tracer fields
 
       !                                     ! Dynamics
       IF( lk_c1d        )   CALL dyn_dmp_init   ! internal damping trends- momentum
-      CALL dyn_adv_init   ! advection (vector or flux form)
-      CALL dyn_vor_init   ! vorticity term including Coriolis
-      CALL dyn_ldf_init   ! lateral mixing
-      CALL dyn_hpg_init   ! horizontal gradient of Hydrostatic pressure
-      CALL dyn_zdf_init   ! vertical diffusion
-      CALL dyn_spg_init   ! surface pressure gradient
+                            CALL dyn_adv_init   ! advection (vector or flux form)
+                            CALL dyn_vor_init   ! vorticity term including Coriolis
+                            CALL dyn_ldf_init   ! lateral mixing
+                            CALL dyn_hpg_init   ! horizontal gradient of Hydrostatic pressure
+                            CALL dyn_zdf_init   ! vertical diffusion
+                            CALL dyn_spg_init   ! surface pressure gradient
 
       !                                     ! Misc. options
       IF( nn_cla == 1 .AND. cp_cfg == 'orca' .AND. jp_cfg == 2 )   CALL cla_init       ! Cross Land Advection
-      CALL icb_init( rdt, nit000)   ! initialise icebergs instance
-      CALL sto_par_init   ! Stochastic parametrization
+                            CALL icb_init( rdt, nit000)   ! initialise icebergs instance
+                            CALL sto_par_init   ! Stochastic parametrization
       IF( ln_sto_eos     )  CALL sto_pts_init   ! RRandom T/S fluctuations
 
 #if defined key_top
       !                                     ! Passive tracers
-      CALL     trc_init
+                            CALL     trc_init
 #endif
       !                                     ! Diagnostics
       IF( lk_floats     )   CALL     flo_init   ! drifting Floats
       IF( lk_diaar5     )   CALL dia_ar5_init   ! ar5 diag
-      CALL dia_ptr_init   ! Poleward TRansports initialization
+                            CALL dia_ptr_init   ! Poleward TRansports initialization
       IF( lk_diadct     )   CALL dia_dct_init   ! Sections tranports
-      CALL dia_hsb_init   ! heat content, salt content and volume budgets
-      CALL     trd_init   ! Mixed-layer/Vorticity/Integral constraints trends
+                            CALL dia_hsb_init   ! heat content, salt content and volume budgets
+                            CALL     trd_init   ! Mixed-layer/Vorticity/Integral constraints trends
       IF( lk_diaobs     ) THEN                  ! Observation & model comparison
-         CALL dia_obs_init            ! Initialize observational data
-         CALL dia_obs( nit000 - 1 )   ! Observation operator for restart
+                            CALL dia_obs_init            ! Initialize observational data
+                            CALL dia_obs( nit000 - 1 )   ! Observation operator for restart
       ENDIF
 
       !                                     ! Assimilation increments
@@ -793,7 +793,7 @@ CONTAINS
          !
       END DO
 
-20    CONTINUE      ! Label 20 is the exit point from the factor search loop.
+   20 CONTINUE      ! Label 20 is the exit point from the factor search loop.
       !
    END SUBROUTINE factorise
 
@@ -824,46 +824,46 @@ CONTAINS
 
       !if I am a process in the north
       IF ( njmpp == njmppmax ) THEN
-         !sxM is the first point (in the global domain) needed to compute the
-         !north-fold for the current process
-         sxM = jpiglo - nimppt(narea) - nlcit(narea) + 1
-         !dxM is the last point (in the global domain) needed to compute the
-         !north-fold for the current process
-         dxM = jpiglo - nimppt(narea) + 2
+          !sxM is the first point (in the global domain) needed to compute the
+          !north-fold for the current process
+          sxM = jpiglo - nimppt(narea) - nlcit(narea) + 1
+          !dxM is the last point (in the global domain) needed to compute the
+          !north-fold for the current process
+          dxM = jpiglo - nimppt(narea) + 2
 
-         !loop over the other north-fold processes to find the processes
-         !managing the points belonging to the sxT-dxT range
+          !loop over the other north-fold processes to find the processes
+          !managing the points belonging to the sxT-dxT range
 
-         DO jn = 1, jpni
-            !sxT is the first point (in the global domain) of the jn
-            !process
-            sxT = nfiimpp(jn, jpnj)
-            !dxT is the last point (in the global domain) of the jn
-            !process
-            dxT = nfiimpp(jn, jpnj) + nfilcit(jn, jpnj) - 1
-            IF ((sxM .gt. sxT) .AND. (sxM .lt. dxT)) THEN
-               nsndto = nsndto + 1
-               isendto(nsndto) = jn
-            ELSEIF ((sxM .le. sxT) .AND. (dxM .ge. dxT)) THEN
-               nsndto = nsndto + 1
-               isendto(nsndto) = jn
-            ELSEIF ((dxM .lt. dxT) .AND. (sxT .lt. dxM)) THEN
-               nsndto = nsndto + 1
-               isendto(nsndto) = jn
-            END IF
-         END DO
-         nfsloop = 1
-         nfeloop = nlci
-         DO jn = 2,jpni-1
-            IF(nfipproc(jn,jpnj) .eq. (narea - 1)) THEN
-               IF (nfipproc(jn - 1 ,jpnj) .eq. -1) THEN
-                  nfsloop = nldi
-               ENDIF
-               IF (nfipproc(jn + 1,jpnj) .eq. -1) THEN
-                  nfeloop = nlei
-               ENDIF
-            ENDIF
-         END DO
+          DO jn = 1, jpni
+                !sxT is the first point (in the global domain) of the jn
+                !process
+                sxT = nfiimpp(jn, jpnj)
+                !dxT is the last point (in the global domain) of the jn
+                !process
+                dxT = nfiimpp(jn, jpnj) + nfilcit(jn, jpnj) - 1
+                IF ((sxM .gt. sxT) .AND. (sxM .lt. dxT)) THEN
+                   nsndto = nsndto + 1
+                     isendto(nsndto) = jn
+                ELSEIF ((sxM .le. sxT) .AND. (dxM .ge. dxT)) THEN
+                   nsndto = nsndto + 1
+                     isendto(nsndto) = jn
+                ELSEIF ((dxM .lt. dxT) .AND. (sxT .lt. dxM)) THEN
+                   nsndto = nsndto + 1
+                     isendto(nsndto) = jn
+                END IF
+          END DO
+          nfsloop = 1
+          nfeloop = nlci
+          DO jn = 2,jpni-1
+           IF(nfipproc(jn,jpnj) .eq. (narea - 1)) THEN
+              IF (nfipproc(jn - 1 ,jpnj) .eq. -1) THEN
+                 nfsloop = nldi
+              ENDIF
+              IF (nfipproc(jn + 1,jpnj) .eq. -1) THEN
+                 nfeloop = nlei
+              ENDIF
+           ENDIF
+        END DO
 
       ENDIF
       l_north_nogather = .TRUE.

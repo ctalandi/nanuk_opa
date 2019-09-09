@@ -131,7 +131,7 @@ CONTAINS
          WRITE(numout,*) '              MFS  bulk  formulation                     ln_blk_mfs  = ', ln_blk_mfs
          WRITE(numout,*) '              ocean-atmosphere coupled formulation       ln_cpl      = ', ln_cpl
          WRITE(numout,*) '              forced-coupled mixed formulation           ln_mixcpl   = ', ln_mixcpl
-         WRITE(numout,*) '              OASIS coupling (with atm or neXtSIM)           lk_oasis    = ', lk_oasis
+         WRITE(numout,*) '              OASIS coupling (with atm or sas)           lk_oasis    = ', lk_oasis
          WRITE(numout,*) '              components of your executable              nn_components = ', nn_components
          WRITE(numout,*) '              Multicategory heat flux formulation (LIM3) nn_limflx   = ', nn_limflx
          WRITE(numout,*) '           Misc. options of sbc : '
@@ -160,11 +160,11 @@ CONTAINS
       END SELECT
       !
       IF ( nn_components /= jp_iam_nemo .AND. .NOT. lk_oasis )   &
-         &      CALL ctl_stop( 'STOP', 'sbc_init : OPA-neXtSIM coupled via OASIS, but key_oasis3 disabled' )
+         &      CALL ctl_stop( 'STOP', 'sbc_init : OPA-SAS coupled via OASIS, but key_oasis3 disabled' )
       IF ( nn_components == jp_iam_opa .AND. ln_cpl )   &
-         &      CALL ctl_stop( 'STOP', 'sbc_init : OPA-neXtSIM coupled via OASIS, but ln_cpl = T in OPA' )
+         &      CALL ctl_stop( 'STOP', 'sbc_init : OPA-SAS coupled via OASIS, but ln_cpl = T in OPA' )
       IF ( nn_components == jp_iam_opa .AND. ln_mixcpl )   &
-         &      CALL ctl_stop( 'STOP', 'sbc_init : OPA-neXtSIM coupled via OASIS, but ln_mixcpl = T in OPA' )
+         &      CALL ctl_stop( 'STOP', 'sbc_init : OPA-SAS coupled via OASIS, but ln_mixcpl = T in OPA' )
       IF ( ln_cpl .AND. .NOT. lk_oasis )    &
          &      CALL ctl_stop( 'STOP', 'sbc_init : OASIS-coupled atmosphere model, but key_oasis3 disabled' )
       IF( ln_mixcpl .AND. .NOT. lk_oasis )    &
@@ -172,7 +172,7 @@ CONTAINS
       IF( ln_mixcpl .AND. .NOT. ln_cpl )    &
          &      CALL ctl_stop( 'the forced-coupled mixed mode (ln_mixcpl) requires ln_cpl = T' )
       IF( ln_mixcpl .AND. nn_components /= jp_iam_nemo )    &
-         &      CALL ctl_stop( 'the forced-coupled mixed mode (ln_mixcpl) is not yet working with neXtSIM-opa coupling via oasis' )
+         &      CALL ctl_stop( 'the forced-coupled mixed mode (ln_mixcpl) is not yet working with sas-opa coupling via oasis' )
 
       !                              ! allocate sbc arrays
       IF( sbc_oce_alloc() /= 0 )   CALL ctl_stop( 'STOP', 'sbc_init : unable to allocate sbc_oce arrays' )
@@ -259,17 +259,17 @@ CONTAINS
          IF( nsbc == jp_core    )   WRITE(numout,*) '              CORE bulk formulation'
          IF( nsbc == jp_purecpl )   WRITE(numout,*) '              pure coupled formulation'
          IF( nsbc == jp_mfs     )   WRITE(numout,*) '              MFS Bulk formulation'
-         IF( nsbc == jp_none    )   WRITE(numout,*) '              OPA coupled to neXtSIM via oasis'
+         IF( nsbc == jp_none    )   WRITE(numout,*) '              OPA coupled to SAS via oasis'
          IF( ln_mixcpl          )   WRITE(numout,*) '              + forced-coupled mixed formulation'
          IF( nn_components/= jp_iam_nemo )  &
-            &                       WRITE(numout,*) '              + OASIS coupled neXtSIM'
+            &                       WRITE(numout,*) '              + OASIS coupled SAS'
       ENDIF
       !
       IF( lk_oasis )   CALL sbc_cpl_init (nn_ice)   ! OASIS initialisation. must be done before: (1) first time step
       !                                                     !                                            (2) the use of nn_fsbc
 
-!     nn_fsbc initialization if OPA-neXtSIM coupling via OASIS
-!     neXtSIM model time step has to be declared in OASIS (mandatory) -> nn_fsbc has to be modified accordingly
+!     nn_fsbc initialization if OPA-SAS coupling via OASIS
+!     sas model time step has to be declared in OASIS (mandatory) -> nn_fsbc has to be modified accordingly
       IF ( nn_components /= jp_iam_nemo ) THEN
 
          IF ( nn_components == jp_iam_opa ) nn_fsbc = cpl_freq('O_SFLX') / NINT(rdt)
@@ -277,7 +277,7 @@ CONTAINS
          !
          IF(lwp)THEN
             WRITE(numout,*)
-            WRITE(numout,*)"   OPA-neXtSIM coupled via OASIS : nn_fsbc re-defined from OASIS namcouple ", nn_fsbc
+            WRITE(numout,*)"   OPA-SAS coupled via OASIS : nn_fsbc re-defined from OASIS namcouple ", nn_fsbc
             WRITE(numout,*)
          ENDIF
       ENDIF
@@ -367,7 +367,7 @@ CONTAINS
       CASE( jp_clio  )   ;   CALL sbc_blk_clio( kt )                    ! bulk formulation : CLIO for the ocean
       CASE( jp_core  )   
          IF( nn_components == jp_iam_sas ) &
-            &                CALL sbc_cpl_rcv ( kt, nn_fsbc, nn_ice )   ! OPA-neXtSIM coupling: neXtSIM receiving fields from OPA 
+            &                CALL sbc_cpl_rcv ( kt, nn_fsbc, nn_ice )   ! OPA-SAS coupling: SAS receiving fields from OPA 
                              CALL sbc_blk_core( kt )                    ! bulk formulation : CORE for the ocean
                                                                         ! from oce: sea surface variables (sst_m, sss_m,  ssu_m,  ssv_m)
       CASE( jp_purecpl )  ;  CALL sbc_cpl_rcv ( kt, nn_fsbc, nn_ice )   ! pure coupled formulation
@@ -375,7 +375,7 @@ CONTAINS
       CASE( jp_mfs   )   ;   CALL sbc_blk_mfs ( kt )                    ! bulk formulation : MFS for the ocean
       CASE( jp_none  ) 
          IF( nn_components == jp_iam_opa ) &
-                             CALL sbc_cpl_rcv ( kt, nn_fsbc, nn_ice )   ! OPA-neXtSIM coupling: OPA receiving fields from neXtSIM
+                             CALL sbc_cpl_rcv ( kt, nn_fsbc, nn_ice )   ! OPA-SAS coupling: OPA receiving fields from SAS
       CASE( jp_esopa )                                
                              CALL sbc_ana     ( kt )                    ! ESOPA, test ALL the formulations
                              CALL sbc_gyre    ( kt )                    !
@@ -471,6 +471,13 @@ CONTAINS
          IF( nn_ice > 0 .OR. nn_components == jp_iam_opa )   CALL iom_put( "ice_cover", fr_i )   ! ice fraction 
          CALL iom_put( "taum"  , taum       )                   ! wind stress module 
          CALL iom_put( "wspd"  , wndm       )                   ! wind speed  module over free ocean or leads in presence of sea-ice
+!CT Additional fields start {
+      IF( iom_use('qla') )   CALL iom_put( "qla"  , qla_tot(:,:)   ) ! latent   heat flux at ocean & sea ice surface
+      IF( iom_use('qsb') )   CALL iom_put( "qsb"  , qsb_tot(:,:)   ) ! sensible heat flux at ocean & sea ice surface
+      IF( iom_use('qlw') )   CALL iom_put( "qlw"  , qlw_tot(:,:)   ) ! longwave heat flux at ocean & sea ice surface
+      IF( iom_use('evap') )  CALL iom_put( "evap" , evap_tot(:,:)  ) ! Evaporation at ocean & sea ice surface
+!CT Additional fields end }
+
       ENDIF
       !
       CALL iom_put( "utau", utau )   ! i-wind stress   (stress can be updated at 
